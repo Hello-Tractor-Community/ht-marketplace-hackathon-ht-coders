@@ -5,15 +5,15 @@ import { Make } from "../makes/page";
 import { Model } from "../models/page";
 import DataTable from "@/components/ui/DataTable/data-table";
 
-type Product = {
+type Listing = {
     name:string,
     make: string,
     makeId: string | number,
     model: string,
     modelId: string | number,
-    specs: Map<string, any>,
+    features: Map<string, any>,
     photos: string[] | URL[],
-    history: string,
+    description: string,
     location: string,
     locationId: string | number,
     price: number,
@@ -23,7 +23,7 @@ type Product = {
     qtyInStock: number
 }
 
-const productColumns:ColumnDef<Product>[] = [
+const listingColumns:ColumnDef<Listing>[] = [
     {
         accessorKey: "photos",
         header: "Photo"
@@ -46,23 +46,23 @@ const productColumns:ColumnDef<Product>[] = [
     }
 ]
 
-function ProductManager() {
+function ListingManager() {
 
     const [allData, setAllData] = useState<{
         makes:Make[], 
         models:Model[], 
-        products:Product[]}>({
+        listings:Listing[]}>({
             makes:[],
             models:[],
-            products:[]
+            listings:[]
     });
 
     useEffect(()=>{
         const localStorageData = JSON.parse(
-            localStorage.getItem("data") || '{"makes":[], "models":[], "products":[]}'
+            localStorage.getItem("data") || '{"makes":[], "models":[], "listings":[]}'
         );
-        if(!("products" in localStorageData)){
-            localStorageData.products = []
+        if(!("listings" in localStorageData)){
+            localStorageData.listings = []
         }
     }, []);
 
@@ -71,9 +71,9 @@ function ProductManager() {
             <div className="flex">
                 
             </div>
-            <DataTable columns={productColumns} data={allData.products} />
+            <DataTable columns={listingColumns} data={allData.listings} />
         </div>
      );
 }
 
-export default ProductManager;
+export default ListingManager;

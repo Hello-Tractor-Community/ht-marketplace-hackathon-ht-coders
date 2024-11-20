@@ -1,4 +1,4 @@
-import CounterCard from "./components/CounterCard";
+import CounterCard from "./_components/CounterCard";
 
 function AdminPanel() {
     return (<>
