@@ -6,7 +6,7 @@ import { Model } from "../models/page";
 import DataTable from "@/components/ui/DataTable/data-table";
 
 type Listing = {
-    name:string,
+    title:string,
     make: string,
     makeId: string | number,
     model: string,

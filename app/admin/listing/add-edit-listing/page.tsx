@@ -16,7 +16,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export const listingFormSchema = z.object({
     photos: z.instanceof(FileList),
-    name: z.string().min(1),
+    title: z.string().min(1),
     makeId: z.string(),
     modelId: z.string(),
     description: z.string(),
@@ -29,7 +29,7 @@ function AddEditListing() {
     const form = useForm<z.infer<typeof listingFormSchema>>({
         resolver: zodResolver(listingFormSchema),
         defaultValues: {
-            name: "",
+            title: "",
             description: "",
             location: "",
             makeId: "",
@@ -133,7 +133,7 @@ function AddEditListing() {
                                 <div className="col grid gap-3">
                                     <FormField
                                         control={form.control}
-                                        name="name"
+                                        name="title"
                                         render={({ field }) => (
                                             <FormItem>
                                                 <FormLabel>Name</FormLabel>

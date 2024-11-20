@@ -63,8 +63,10 @@ model Listing {
   description String
   price       Float
   location    String
-  brand       String
-  model       String
+  makeId      String
+  make        Make          @relation(fields: [makeId], references: [id], onDelete: NoAction)
+  modelId     String
+  model       Model         @relation(fields: [modelId], references: [id], onDelete: NoAction)
   year        Int
   photos      String[] // Array of photo URLs
   sellerId    String
@@ -74,6 +76,21 @@ model Listing {
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
   AdminAction AdminAction[]
+}
+
+model Make {
+  id      String    @id @default(cuid())
+  name    String
+  Model   Model[]
+  Listing Listing[]
+}
+
+model Model {
+  id      String    @id @default(cuid())
+  name    String
+  makeId  String
+  make    Make      @relation(fields: [makeId], references: [id], onDelete: Cascade)
+  Listing Listing[]
 }
 
 model Inquiry {

@@ -1,4 +1,3 @@
-"use client"
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useForm } from "react-hook-form";
@@ -9,7 +8,7 @@ const formSchema = z.object({
     search:z.string()
 })
 
-function SearchMake() {
+function SearchLocation() {
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -37,4 +36,4 @@ function SearchMake() {
     </>);
 }
 
-export default SearchMake;
+export default SearchLocation;
