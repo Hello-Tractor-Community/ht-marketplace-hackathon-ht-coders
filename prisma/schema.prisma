@@ -8,16 +8,22 @@ datasource db {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String    @unique
-  emailVerified DateTime?
-  image         String?
-  accounts      Account[]
-  sessions      Session[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id               String        @id @default(cuid())
+  name             String?
+  email            String        @unique
+  emailVerified    DateTime?
+  phone            String?       @unique
+  image            String?
+  role             Role          @default(USER) // USER, ADMIN
+  accounts         Account[]
+  sessions         Session[]
+  messagesSent     Message[]     @relation("SentMessages")
+  messagesReceived Message[]     @relation("ReceivedMessages")
+  listings         Listing[]
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  Inquiry          Inquiry[]
+  AdminAction      AdminAction[]
 }
 
 model Account {
@@ -51,10 +57,78 @@ model Session {
   updatedAt DateTime @updatedAt
 }
 
+model Listing {
+  id          String        @id @default(cuid())
+  title       String
+  description String
+  price       Float
+  location    String
+  brand       String
+  model       String
+  year        Int
+  photos      String[] // Array of photo URLs
+  sellerId    String
+  seller      User          @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+  inquiries   Inquiry[]
+  status      ListingStatus @default(ACTIVE) // ACTIVE, SOLD, INACTIVE
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  AdminAction AdminAction[]
+}
+
+model Inquiry {
+  id        String   @id @default(cuid())
+  message   String
+  buyerId   String
+  buyer     User     @relation(fields: [buyerId], references: [id], onDelete: Cascade)
+  listingId String
+  listing   Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Message {
+  id         String   @id @default(cuid())
+  content    String
+  senderId   String
+  sender     User     @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  receiverId String
+  receiver   User     @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
 model VerificationToken {
   identifier String
   token      String
   expires    DateTime
 
   @@id([identifier, token])
+}
+
+model AdminAction {
+  id         String          @id @default(cuid())
+  adminId    String
+  admin      User            @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  actionType AdminActionType
+  listingId  String?
+  listing    Listing?        @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  createdAt  DateTime        @default(now())
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum ListingStatus {
+  ACTIVE
+  SOLD
+  INACTIVE
+}
+
+enum AdminActionType {
+  APPROVE
+  REJECT
+  REMOVE
 }
