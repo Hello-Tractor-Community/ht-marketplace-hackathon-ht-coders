@@ -1,4 +1,3 @@
-"use client"
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
@@ -13,11 +12,11 @@ const formSchema = z.object({
     })
 })
 
-interface AddMakeProps {
+interface AddLocationProps {
     onAdd: () => void
 }
 
-function AddMake() {
+function AddLocation({ onAdd }: AddLocationProps) {
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -34,19 +33,19 @@ function AddMake() {
             ...values
         });
         localStorage.setItem("data", JSON.stringify(localStorageData));
-        // onAdd();
+        onAdd();
     }
 
     return (
         <Dialog>
             <DialogTrigger asChild>
-                <Button>Add Make</Button>
+                <Button>Add Location</Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px">
                 <DialogHeader>
-                    <DialogTitle>Add Make</DialogTitle>
+                    <DialogTitle>Add Location</DialogTitle>
                     <DialogDescription>
-                        Add tractor make
+                        Add location
                     </DialogDescription>
                 </DialogHeader>
 
@@ -64,7 +63,7 @@ function AddMake() {
                                     </FormControl>
                                 </FormItem>
                             )} />
-                        <Button type="submit">Save Make</Button>
+                        <Button type="submit">Save Location</Button>
                     </form>
                 </Form>
                 <DialogFooter>
@@ -74,4 +73,4 @@ function AddMake() {
     );
 }
 
-export default AddMake;
+export default AddLocation;
