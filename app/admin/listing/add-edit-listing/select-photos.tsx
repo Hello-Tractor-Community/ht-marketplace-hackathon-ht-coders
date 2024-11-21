@@ -14,19 +14,9 @@ interface ErrorType {
     doc_upload?: string;
 }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 const imagesSchema = z.unknown().transform(value => {
     return value as FileList
 })
-=======
-const imagesSchema = z.instanceof(FileList)
->>>>>>> 39c4d1d (Adding Listing)
-=======
-const imagesSchema = z.unknown().transform(value => {
-    return value as FileList
-})
->>>>>>> 3cc655b (Add the not found page to redirect the users to home thus improving userability)
     .refine((list) => list.length > 0, "No files selected")
     .transform(list => Array.from(list))
     .refine(files => {
