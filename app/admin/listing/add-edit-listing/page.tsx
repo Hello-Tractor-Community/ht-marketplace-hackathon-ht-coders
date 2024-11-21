@@ -10,9 +10,11 @@ import { Textarea } from "@/components/ui/textarea";
 import React, { useEffect, useState } from "react";
 import AddSpecName from "./add-feature-name";
 import { Button } from "@/components/ui/button";
-import { Files } from "lucide-react";
 import SelectPhotos from "./select-photos";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Listing, Model } from "@prisma/client";
+import { create } from "../actions";
+import { getAllMadels } from "../../models/actions";
 
 export const listingFormSchema = z.object({
     photos: z.instanceof(FileList),
@@ -42,6 +44,16 @@ function AddEditListing() {
 
     const [features, setFeatures] = useState<any>({});
     const [feature, setFeature] = useState<any>();
+    const [models, setModels] = useState<Model[]>([]);
+    
+    useEffect(()=>{
+        getModels();
+    }, []);
+
+    async function getModels(){
+        const m:Model[] = await getAllMadels();
+        console.log(m);
+    }
 
     function addFeature(specName: string, value: string = "") {
         setFeatures((f: any) => {
@@ -54,8 +66,13 @@ function AddEditListing() {
         setFeature({ ...feature, value: evt.currentTarget.value });
     }
 
-    function onSubmit(values: z.infer<typeof listingFormSchema>) {
-        console.log(values)
+    async function onSubmit(values: z.infer<typeof listingFormSchema>) {
+        // const fd = new FormData()
+        // Object.keys(values).forEach((k:string)=>{
+            
+        // })
+        const listing:Listing = await create(values);
+        // console.log(listing);
     }
 
     const ListingFeatures = () => {
