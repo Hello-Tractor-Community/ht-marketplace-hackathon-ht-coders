@@ -53,12 +53,12 @@ const listingColumns:ColumnDef<Listing>[] = [
     {
         accessorKey: "make",
         header: "Make",
-        cell: ({row})=>row.getValue("make").name
+        cell: ({row})=>row.getValue("make")!.name
     },
     {
         accessorKey: "model",
         header: "Model",
-        cell: ({row})=>row.getValue("model").name
+        cell: ({row})=>row.getValue("model")!.name
     },
     {
         accessorKey: "location",
