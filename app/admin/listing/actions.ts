@@ -1,6 +1,7 @@
 "use server"
 import { prisma } from "@/lib/prisma";
 import { Listing, Prisma } from "@prisma/client";
+import { InputJsonValue } from "@prisma/client/runtime/library";
 import { v2 as cloudinary, UploadApiErrorResponse, UploadApiResponse } from 'cloudinary';
 import { z } from "zod";
 
@@ -23,10 +24,10 @@ cloudinary.config({
 //     sellerId: z.string().default("cm3r4b3iv0001h7w49ycda15e").optional()
 // });
 
-export async function create(data: FormData) {
+export async function create(formData: FormData) {
 
     try {
-        const photos = data.getAll("photos");
+        const photos = formData.getAll("photos");
         const uploadPromises: Promise<UploadApiResponse | UploadApiErrorResponse>[] = [];
         for (let i = 0; i < photos.length; i++) {
             const file = photos[i] as File;
@@ -39,30 +40,20 @@ export async function create(data: FormData) {
 
         const uploadedFiles: { status: string, value: UploadApiResponse }[] = await Promise.allSettled(uploadPromises) as { status: string, value: UploadApiResponse }[];
 
-        const listingData: any = {};
-        data.forEach((v, k: string) => {
-            if (k == "features") {
-                listingData[k] = v as Prisma.JsonValue;
-            }
-            else if(["year", "price"].includes(k)){
-                listingData[k] = Number(v)
-            }
-            else listingData[k] = k === "photos" ?
-                uploadedFiles.map(({ value }) => value.secure_url)
-                : v;
-        });
-        listingData.sellerId="cm3r4b3iv0001h7w49ycda15e";
-        console.log(listingData);
+        const data = {
+            description: formData.get("description") as string,
+            features: JSON.parse(formData.get("features") as string),
+            location: formData.get("location") as string,
+            price: Number(formData.get("price")),
+            title: formData.get("title") as string,
+            year: Number(formData.get("year")),
+            makeId: formData.get("makeId") as string,
+            modelId: formData.get("modelId") as string,
+            photos: uploadedFiles.map(({ value }) => value.secure_url)
+        }
 
-        // const validation = listingFormSchema.parse(listingData);
-        // console.log(validation);
-
-        prisma.listing.create({
-            data: listingData
-        }).catch(e=>{
-            console.log(e)
-        });
-        return {}
+        console.log(data);
+        return await prisma.listing.create({data});
     }
     catch (e: any) {
         console.log(e);

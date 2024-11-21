@@ -18,6 +18,7 @@ import { redirect } from "next/navigation";
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@radix-ui/react-select";
 import { Make, Model } from "@prisma/client";
+import { Loader } from "lucide-react";
 
 export const listingFormSchema = z.object({
     photos: z.unknown().transform(value => { return value as FileList }),
@@ -51,13 +52,14 @@ function AddEditListingForm({ makes }: AddEditListingFormProps) {
             price: 0,
             features: {},
             year: Number((new Date()).getFullYear() - 2),
-            sellerId:""
+            sellerId: ""
         }
     });
 
     const [features, setFeatures] = useState<any>({});
     const [feature, setFeature] = useState<any>();
     const [models, setModels] = useState<Model[]>([]);
+    const [saving, setSaving] = useState<boolean>(false);
 
     function addFeature(specName: string, value: string = "") {
         setFeatures((f: any) => {
@@ -84,9 +86,17 @@ function AddEditListingForm({ makes }: AddEditListingFormProps) {
                 formData.append("features", JSON.stringify(Object.fromEntries(v)))
             }
             else formData.set(k, v)
+        });
+
+        setSaving(true);
+        create(formData).then(resp => {
+            console.log(resp);
+            redirect("/admin/listing");
         })
-        const listing = await create(formData);
-        redirect("/admin/listing");
+            .finally(() => setSaving(false))
+            .catch(error => {
+                console.log(error);
+            });
     }
 
     const ListingFeatures = () => {
@@ -303,7 +313,12 @@ function AddEditListingForm({ makes }: AddEditListingFormProps) {
                                             </FormItem>
                                         )} />
 
-                                    <Button type="submit">Save Listing</Button>
+
+                                    <Button type="submit" disabled={saving}>{
+                                        saving ? 
+                                            <><Loader className="mr-2 h-4 w-4 animate-spin" /> Saving...</>
+                                            : <span>Save Listing</span>
+                                    }</Button>
                                 </div>
 
                             </div>

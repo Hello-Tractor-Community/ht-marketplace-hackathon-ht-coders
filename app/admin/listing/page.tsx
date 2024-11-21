@@ -5,7 +5,12 @@ import Link from "next/link";
 
 async function ListingManager() {
 
-    const listingData:Listing[] = await prisma.listing.findMany();
+    const listingData:Listing[] = await prisma.listing.findMany({
+        include:{
+            make: true,
+            model: true
+        }
+    });
     console.log(listingData);
 
     return ( 
