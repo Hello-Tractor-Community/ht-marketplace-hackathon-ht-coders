@@ -1,5 +1,5 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
   previewFeatures = ["relationJoins"]
 }
 
@@ -21,7 +21,7 @@ model User {
   accounts         Account[]
   AdminAction      AdminAction[]
   Inquiry          Inquiry[]
-  listings         Listing[]
+  // listings         Listing[]
   messagesReceived Message[]     @relation("ReceivedMessages")
   messagesSent     Message[]     @relation("SentMessages")
   sessions         Session[]
@@ -63,7 +63,7 @@ model Listing {
   location    String
   year        Int
   photos      String[]
-  sellerId    String
+  // sellerId    String        @default("")
   status      ListingStatus @default(ACTIVE)
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
@@ -74,7 +74,7 @@ model Listing {
   inquiries   Inquiry[]
   make        Make          @relation(fields: [makeId], references: [id], onDelete: NoAction)
   model       Model         @relation(fields: [modelId], references: [id], onDelete: NoAction)
-  seller      User          @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+  // seller      User          @relation(fields: [sellerId], references: [id], onDelete: Cascade)
 }
 
 model Make {

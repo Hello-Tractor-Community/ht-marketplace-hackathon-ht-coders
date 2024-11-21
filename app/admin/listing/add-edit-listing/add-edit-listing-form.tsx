@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 "use client";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -8,96 +7,57 @@ import { SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/compone
 import { FormProvider, useForm, useFormContext } from "react-hook-form";
 import { z } from "zod";
 import { Textarea } from "@/components/ui/textarea";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import AddSpecName from "./add-feature-name";
 import { Button } from "@/components/ui/button";
-<<<<<<< HEAD
-<<<<<<< HEAD
 import SelectPhotos from "./select-photos";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Listing, Model } from "@prisma/client";
 import { create } from "../actions";
 import { getAllMadels } from "../../models/actions";
 import { redirect } from "next/navigation";
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Separator } from "@radix-ui/react-select";
+import { Make, Model } from "@prisma/client";
 
 export const listingFormSchema = z.object({
-    photos: z.unknown().transform(value=>{ return value as FileList }),
+    photos: z.unknown().transform(value => { return value as FileList }),
     title: z.string().min(1),
-=======
-import { Files } from "lucide-react";
-=======
->>>>>>> 3cc655b (Add the not found page to redirect the users to home thus improving userability)
-import SelectPhotos from "./select-photos";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Listing, Model } from "@prisma/client";
-import { create } from "../actions";
-import { getAllMadels } from "../../models/actions";
-import { redirect } from "next/navigation";
-
-export const listingFormSchema = z.object({
-<<<<<<< HEAD
-    photos: z.instanceof(FileList),
-<<<<<<< HEAD
-    name: z.string().min(1),
->>>>>>> 39c4d1d (Adding Listing)
-=======
-=======
-    photos: z.unknown().transform(value=>{ return value as FileList }),
->>>>>>> 3cc655b (Add the not found page to redirect the users to home thus improving userability)
-    title: z.string().min(1),
->>>>>>> 9d95e1d (Added location manager)
     makeId: z.string(),
     modelId: z.string(),
     description: z.string(),
     location: z.string(),
     price: z.preprocess((a) => parseInt(z.string().parse(a), 10), z.number()),
-    features: z.map(z.string(), z.any())
+    features: z.map(z.string(), z.any()),
+    year: z.number(),
+    sellerId: z.string().default("").optional()
 });
 
-function AddEditListing() {
+listingFormSchema.optional()
+
+interface AddEditListingFormProps {
+    makes: Make[]
+}
+
+function AddEditListingForm({ makes }: AddEditListingFormProps) {
     const form = useForm<z.infer<typeof listingFormSchema>>({
         resolver: zodResolver(listingFormSchema),
         defaultValues: {
-<<<<<<< HEAD
-<<<<<<< HEAD
             title: "",
-=======
-            name: "",
->>>>>>> 39c4d1d (Adding Listing)
-=======
-            title: "",
->>>>>>> 9d95e1d (Added location manager)
             description: "",
             location: "",
             makeId: "",
             modelId: "",
             photos: [] as unknown as FileList,
             price: 0,
-            features: {}
+            features: {},
+            year: Number((new Date()).getFullYear() - 2),
+            sellerId:""
         }
     });
 
     const [features, setFeatures] = useState<any>({});
     const [feature, setFeature] = useState<any>();
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 3cc655b (Add the not found page to redirect the users to home thus improving userability)
     const [models, setModels] = useState<Model[]>([]);
-    
-    useEffect(()=>{
-        getModels();
-    }, []);
-
-    async function getModels(){
-        const m:Model[] = await getAllMadels();
-        console.log(m);
-    }
-<<<<<<< HEAD
-=======
->>>>>>> 39c4d1d (Adding Listing)
-=======
->>>>>>> 3cc655b (Add the not found page to redirect the users to home thus improving userability)
 
     function addFeature(specName: string, value: string = "") {
         setFeatures((f: any) => {
@@ -110,33 +70,23 @@ function AddEditListing() {
         setFeature({ ...feature, value: evt.currentTarget.value });
     }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 3cc655b (Add the not found page to redirect the users to home thus improving userability)
     async function onSubmit(values: z.infer<typeof listingFormSchema>) {
+        // const isValid = listingFormSchema.parse(values);
         const formData = new FormData();
-        Object.entries(values).map(([k, v]:any[])=>{
-            if(k == "photos"){
-                for(let i =0; i<v.length; i++){
-                    const file:File = v.item(i);
+        Object.entries(values).map(([k, v]: any[]) => {
+            if (k == "photos") {
+                for (let i = 0; i < v.length; i++) {
+                    const file: File = v.item(i);
                     formData.append('photos', file, file.name)
                 }
             }
-            else if(k == "features"){
+            else if (k == "features") {
                 formData.append("features", JSON.stringify(Object.fromEntries(v)))
             }
             else formData.set(k, v)
         })
         const listing = await create(formData);
         redirect("/admin/listing");
-<<<<<<< HEAD
-=======
-    function onSubmit(values: z.infer<typeof listingFormSchema>) {
-        console.log(values)
->>>>>>> 39c4d1d (Adding Listing)
-=======
->>>>>>> 3cc655b (Add the not found page to redirect the users to home thus improving userability)
     }
 
     const ListingFeatures = () => {
@@ -164,12 +114,13 @@ function AddEditListing() {
                             placeholder="Type the value" onBlur={updateFeature} /> :
                         <Input type="text" name={k} defaultValue={features[k]} onFocus={(evt) => setFeature({ key: k, value: features[k] })} placeholder="Type the value" />
                     }
+                    <Separator className="my-2" />
                 </div>
             ))}
         </>)
     }
 
-    const PhotoSelector = ({files}:{files:FileList}) => {
+    const PhotoSelector = ({ files }: { files: FileList }) => {
         const { setValue } = useFormContext();
         function handlePhotos(files: FileList) {
             console.log(files)
@@ -182,6 +133,7 @@ function AddEditListing() {
 
     return (
         <div className="container mx-auto py-10">
+            {JSON.stringify(form.formState.errors)}
             <Card>
                 <CardHeader>
                     <CardTitle>Add Listing</CardTitle>
@@ -190,9 +142,9 @@ function AddEditListing() {
                     <Form {...form}>
                         <form onSubmit={form.handleSubmit(onSubmit)} className="">
 
-                            <div className="grid grid-cols-3 gap-3">
+                            <div className="grid md:grid-cols-3 sm:grid-cols-1 gap-3">
 
-                                <div className="col-span-2">
+                                <div className="col">
 
                                     <FormField
                                         control={form.control}
@@ -202,7 +154,7 @@ function AddEditListing() {
                                                 <FormLabel>Images</FormLabel>
                                                 <FormControl>
                                                     <FormProvider {...form}>
-                                                        <PhotoSelector files={field.value}  />
+                                                        <PhotoSelector files={field.value} />
                                                     </FormProvider>
                                                 </FormControl>
                                                 <FormMessage />
@@ -211,18 +163,10 @@ function AddEditListing() {
                                     />
                                 </div>
 
-                                <div className="col grid gap-3">
+                                <div className="col-span-2 grid gap-3">
                                     <FormField
                                         control={form.control}
-<<<<<<< HEAD
-<<<<<<< HEAD
                                         name="title"
-=======
-                                        name="name"
->>>>>>> 39c4d1d (Adding Listing)
-=======
-                                        name="title"
->>>>>>> 9d95e1d (Added location manager)
                                         render={({ field }) => (
                                             <FormItem>
                                                 <FormLabel>Name</FormLabel>
@@ -240,14 +184,18 @@ function AddEditListing() {
                                                 render={({ field }) => (
                                                     <FormItem>
                                                         <FormLabel>Make</FormLabel>
-                                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                        <Select onValueChange={(makeId: string) => {
+                                                            field.onChange(makeId);
+                                                            const make: Make = makes.find(m => m.id == makeId) as Make;
+                                                            if (make) setModels(make.Model);
+                                                        }} defaultValue={field.value}>
                                                             <FormControl>
                                                                 <SelectTrigger>
                                                                     <SelectValue placeholder="Select Make" />
                                                                 </SelectTrigger>
                                                             </FormControl>
                                                             <SelectContent>
-                                                                <SelectItem value="make1">Make 1</SelectItem>
+                                                                {makes.map((make: Make) => <SelectItem key={make.id} value={make.id}>{make.name}</SelectItem>)}
                                                             </SelectContent>
                                                         </Select>
                                                     </FormItem>
@@ -269,7 +217,7 @@ function AddEditListing() {
                                                                 </SelectTrigger>
                                                             </FormControl>
                                                             <SelectContent>
-                                                                <SelectItem value="model1">Model 1</SelectItem>
+                                                                {models.map((model: Model) => <SelectItem key={model.id} value={model.id}>{model.name}</SelectItem>)}
                                                             </SelectContent>
                                                         </Select>
                                                     </FormItem>
@@ -279,25 +227,36 @@ function AddEditListing() {
                                     </div>
 
 
-                                    <FormField
-                                        control={form.control}
-                                        name="location"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Location</FormLabel>
-                                                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                    <FormControl>
-                                                        <SelectTrigger>
-                                                            <SelectValue placeholder="Select Model" />
-                                                        </SelectTrigger>
-                                                    </FormControl>
-                                                    <SelectContent>
-                                                        <SelectItem value="location">Location 1</SelectItem>
-                                                    </SelectContent>
-                                                </Select>
-                                            </FormItem>
-                                        )}
-                                    />
+                                    <div className="flex gap-3 items-center">
+                                        <div className="flex-auto">
+                                            <FormField
+                                                control={form.control}
+                                                name="year"
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>Year</FormLabel>
+                                                        <FormControl>
+                                                            <Input type="number" {...field} />
+                                                        </FormControl>
+                                                    </FormItem>
+                                                )}
+                                            />
+                                        </div>
+                                        <div className="flex-auto">
+                                            <FormField
+                                                control={form.control}
+                                                name="location"
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>Location</FormLabel>
+                                                        <FormControl>
+                                                            <Input {...field} />
+                                                        </FormControl>
+                                                    </FormItem>
+                                                )}
+                                            />
+                                        </div>
+                                    </div>
 
                                     <FormField
                                         control={form.control}
@@ -322,9 +281,11 @@ function AddEditListing() {
                                                         <FormLabel>Add the feature name</FormLabel>
                                                         <AddSpecName onAdd={addFeature} />
                                                     </div>
-                                                    <div className="grid gap-3">
-                                                        <ListingFeatures />
-                                                    </div>
+                                                    <ScrollArea className="h-20 border p-3">
+                                                        <div className="grid gap-3">
+                                                            <ListingFeatures />
+                                                        </div>
+                                                    </ScrollArea>
                                                 </FormItem>
                                             </FormProvider>
                                         )}
@@ -355,25 +316,8 @@ function AddEditListing() {
             </Card>
         </div>
     );
-=======
-
-import { Make, Model } from "@prisma/client";
-import AddEditListingForm from "./add-edit-listing-form";
-import { prisma } from "@/lib/prisma";
-
-async function AddEditListing() {
-    const makeData:Make[] = await prisma.make.findMany({
-        relationLoadStrategy:"join",
-        include:{
-            Model: true
-        }
-    });
-    return (<>
-        <AddEditListingForm makes={makeData} />
-    </>);
->>>>>>> 48fb238 (Upload listing photos to cloudinary)
 }
 
-export default AddEditListing;
+export default AddEditListingForm;
 
 

@@ -15,12 +15,18 @@ interface ErrorType {
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 const imagesSchema = z.unknown().transform(value => {
     return value as FileList
 })
 =======
 const imagesSchema = z.instanceof(FileList)
 >>>>>>> 39c4d1d (Adding Listing)
+=======
+const imagesSchema = z.unknown().transform(value => {
+    return value as FileList
+})
+>>>>>>> 3cc655b (Add the not found page to redirect the users to home thus improving userability)
     .refine((list) => list.length > 0, "No files selected")
     .transform(list => Array.from(list))
     .refine(files => {
@@ -36,6 +42,7 @@ function SelectPhotos({ onSelect, fileList }: SelectPhotosProps) {
     const [error, setError] = useState<ErrorType>({});
     const { setValue } = useFormContext();
     const [images, setImages] = useState<string[]>([]);
+    const [image, setImage] = useState<string>()
 
     useEffect(() => {
         if (fileList) {
@@ -80,18 +87,27 @@ function SelectPhotos({ onSelect, fileList }: SelectPhotosProps) {
                 fr.onload = evt => rs(evt.target?.result as string);
                 fr.readAsDataURL(file);
             });
-        })).then(setImages);
+        })).then(imgs => {
+            setImages(imgs);
+            if (imgs.length > 0) setImage(imgs[0]);
+        });
     }
 
     return (<>
         <Input type="file" onChange={handleFileChange} multiple accept="image/*" />
         {error.img_upload && <span style={{ color: "red" }}>{error.img_upload}</span>}
-        {images.length > 0 && <div className="grid grid-col-3">
-            <div className="col">
-                {images.map((src: string, i: number) => <img key={`img-${i + 1}`} {...{ src }} width={50} />)}
+        {images.length > 0 && <div className="grid gap-3">
+            <div className="flex gap-3">
+                {
+                    images.map((src: string, i: number) => <img key={`img-${i + 1}`} 
+                    {...{ src }} 
+                    width={64} 
+                    className={image === src ? `border border-black` : ''}
+                    onClick={()=>setImage(src)} />)
+                }
             </div>
-            <div className="col-span-2">
-                <img src={images[0]} width={"100%"} />
+            <div className="">
+                <img src={image} width={"100%"} style={{height:"400px", objectFit:"contain"}} />
             </div>
         </div>}
     </>);
