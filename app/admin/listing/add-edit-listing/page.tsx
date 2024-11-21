@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import React, { useEffect, useState } from "react";
 import AddSpecName from "./add-feature-name";
 import { Button } from "@/components/ui/button";
+<<<<<<< HEAD
 import SelectPhotos from "./select-photos";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Listing, Model } from "@prisma/client";
@@ -20,6 +21,19 @@ import { redirect } from "next/navigation";
 export const listingFormSchema = z.object({
     photos: z.unknown().transform(value=>{ return value as FileList }),
     title: z.string().min(1),
+=======
+import { Files } from "lucide-react";
+import SelectPhotos from "./select-photos";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
+export const listingFormSchema = z.object({
+    photos: z.instanceof(FileList),
+<<<<<<< HEAD
+    name: z.string().min(1),
+>>>>>>> 39c4d1d (Adding Listing)
+=======
+    title: z.string().min(1),
+>>>>>>> 9d95e1d (Added location manager)
     makeId: z.string(),
     modelId: z.string(),
     description: z.string(),
@@ -32,7 +46,15 @@ function AddEditListing() {
     const form = useForm<z.infer<typeof listingFormSchema>>({
         resolver: zodResolver(listingFormSchema),
         defaultValues: {
+<<<<<<< HEAD
+<<<<<<< HEAD
             title: "",
+=======
+            name: "",
+>>>>>>> 39c4d1d (Adding Listing)
+=======
+            title: "",
+>>>>>>> 9d95e1d (Added location manager)
             description: "",
             location: "",
             makeId: "",
@@ -45,6 +67,7 @@ function AddEditListing() {
 
     const [features, setFeatures] = useState<any>({});
     const [feature, setFeature] = useState<any>();
+<<<<<<< HEAD
     const [models, setModels] = useState<Model[]>([]);
     
     useEffect(()=>{
@@ -55,6 +78,8 @@ function AddEditListing() {
         const m:Model[] = await getAllMadels();
         console.log(m);
     }
+=======
+>>>>>>> 39c4d1d (Adding Listing)
 
     function addFeature(specName: string, value: string = "") {
         setFeatures((f: any) => {
@@ -67,6 +92,7 @@ function AddEditListing() {
         setFeature({ ...feature, value: evt.currentTarget.value });
     }
 
+<<<<<<< HEAD
     async function onSubmit(values: z.infer<typeof listingFormSchema>) {
         const formData = new FormData();
         Object.entries(values).map(([k, v]:any[])=>{
@@ -83,6 +109,10 @@ function AddEditListing() {
         })
         const listing = await create(formData);
         redirect("/admin/listing");
+=======
+    function onSubmit(values: z.infer<typeof listingFormSchema>) {
+        console.log(values)
+>>>>>>> 39c4d1d (Adding Listing)
     }
 
     const ListingFeatures = () => {
@@ -160,7 +190,15 @@ function AddEditListing() {
                                 <div className="col grid gap-3">
                                     <FormField
                                         control={form.control}
+<<<<<<< HEAD
+<<<<<<< HEAD
                                         name="title"
+=======
+                                        name="name"
+>>>>>>> 39c4d1d (Adding Listing)
+=======
+                                        name="title"
+>>>>>>> 9d95e1d (Added location manager)
                                         render={({ field }) => (
                                             <FormItem>
                                                 <FormLabel>Name</FormLabel>

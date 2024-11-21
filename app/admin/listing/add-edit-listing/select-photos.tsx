@@ -14,9 +14,13 @@ interface ErrorType {
     doc_upload?: string;
 }
 
+<<<<<<< HEAD
 const imagesSchema = z.unknown().transform(value => {
     return value as FileList
 })
+=======
+const imagesSchema = z.instanceof(FileList)
+>>>>>>> 39c4d1d (Adding Listing)
     .refine((list) => list.length > 0, "No files selected")
     .transform(list => Array.from(list))
     .refine(files => {

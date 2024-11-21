@@ -9,11 +9,9 @@ import { SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/compone
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Make, Model } from "@prisma/client";
-import { create } from "../actions";
-import { useEffect, useState } from "react";
-import { getAllMakes } from "../../makes/actions";
 import { redirect } from "next/navigation";
 import { DialogClose } from "@radix-ui/react-dialog";
+import { create } from "../actions";
 
 const formSchema = z.object({
     name: z.string({

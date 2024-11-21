@@ -1,8 +1,8 @@
 import AddModel from "./_components/add-model";
-import SearchModel from "./_components/search-model";
 import { Make, Model } from "@prisma/client";
-import ModelsGrid from "./_components/models-grid";
 import { prisma } from "@/lib/prisma";
+import SearchModel from "./_components/search-model";
+import ModelsGrid from "./_components/models-grid";
 
 
 
