@@ -1,51 +1,27 @@
-"use client";
-import DataTable from "@/components/ui/DataTable/data-table";
-import { ColumnDef } from "@tanstack/react-table";
-import AddModel from "./add-model";
-import SearchModel from "./search-model";
-import { useEffect, useState } from "react";
-import { Make } from "../makes/page";
+import AddModel from "./_components/add-model";
+import { Make, Model } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
+import SearchModel from "./_components/search-model";
+import ModelsGrid from "./_components/models-grid";
 
-export type Model = {
-    id: number,
-    name: string,
-    make: string,
-    makeId: number
-}
 
-const modelColumns: ColumnDef<Model>[] = [
-    {
-        accessorKey: "name",
-        header: "Name"
-    },
-    {
-        accessorKey: "make",
-        header: "Make"
-    }
-]
 
-function Models() {
+async function Models() {
 
-    const [modelData, setModelData] = useState<Model[]>([]);
-    const [makeData, setMakeData] = useState<Make[]>([]);
-
-    useEffect(() => {
-        getModelData();
-    }, []);
-
-    function getModelData(){
-        const localStorageData: { models: Model[], makes:[] } = JSON.parse(localStorage.getItem("data") || '{"models":[], "makes":[]}');
-        setModelData(localStorageData.models || []);
-        setMakeData(localStorageData.makes || []);
-    }
+    const modelData:Model[] = await prisma.model.findMany({
+        include:{
+            make: true
+        }
+    });
+    const makes:Make[] = await prisma.make.findMany();
 
     return (
         <div className="container mx-auto py-10 grid gap-3">
             <div className="flex justify-between">
-                <AddModel onAdd={getModelData} makes={makeData} />
+                <AddModel {...{makes}} />
                 <SearchModel />
             </div>
-            <DataTable columns={modelColumns} data={modelData} />
+            <ModelsGrid data={modelData} />
         </div>
     );
 }
