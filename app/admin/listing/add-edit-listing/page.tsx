@@ -15,9 +15,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Listing, Model } from "@prisma/client";
 import { create } from "../actions";
 import { getAllMadels } from "../../models/actions";
+import { redirect } from "next/navigation";
 
 export const listingFormSchema = z.object({
-    photos: z.instanceof(FileList),
+    photos: z.unknown().transform(value=>{ return value as FileList }),
     title: z.string().min(1),
     makeId: z.string(),
     modelId: z.string(),
@@ -67,12 +68,21 @@ function AddEditListing() {
     }
 
     async function onSubmit(values: z.infer<typeof listingFormSchema>) {
-        // const fd = new FormData()
-        // Object.keys(values).forEach((k:string)=>{
-            
-        // })
-        const listing:Listing = await create(values);
-        // console.log(listing);
+        const formData = new FormData();
+        Object.entries(values).map(([k, v]:any[])=>{
+            if(k == "photos"){
+                for(let i =0; i<v.length; i++){
+                    const file:File = v.item(i);
+                    formData.append('photos', file, file.name)
+                }
+            }
+            else if(k == "features"){
+                formData.append("features", JSON.stringify(Object.fromEntries(v)))
+            }
+            else formData.set(k, v)
+        })
+        const listing = await create(formData);
+        redirect("/admin/listing");
     }
 
     const ListingFeatures = () => {

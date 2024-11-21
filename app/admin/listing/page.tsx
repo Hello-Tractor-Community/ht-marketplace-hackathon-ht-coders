@@ -6,6 +6,7 @@ import Link from "next/link";
 async function ListingManager() {
 
     const listingData:Listing[] = await prisma.listing.findMany();
+    console.log(listingData);
 
     return ( 
         <div className="container mx-auto py-10 grid gap-3">
