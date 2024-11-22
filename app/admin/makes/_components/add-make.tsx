@@ -3,9 +3,14 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { prisma } from "@/lib/prisma";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { create } from "../actions";
+import { Make } from "@prisma/client";
+import { DialogClose } from "@radix-ui/react-dialog";
+import { redirect } from "next/navigation";
 
 const formSchema = z.object({
     name: z.string({
@@ -26,15 +31,9 @@ function AddMake() {
         }
     });
 
-    function onSubmit(values: z.infer<typeof formSchema>) {
-        const localStorageData = JSON.parse(localStorage.getItem("data") || '{"makes":[]}');
-        console.log(values);
-        localStorageData.makes.push({
-            id: localStorageData.makes.length + 1,
-            ...values
-        });
-        localStorage.setItem("data", JSON.stringify(localStorageData));
-        // onAdd();
+    async function onSubmit(values: z.infer<typeof formSchema>) {
+        const make: Make = await create(values);
+        redirect("/admin/makes")
     }
 
     return (
@@ -64,7 +63,9 @@ function AddMake() {
                                     </FormControl>
                                 </FormItem>
                             )} />
-                        <Button type="submit">Save Make</Button>
+                        <DialogClose asChild>
+                            <Button type="submit">Save Make</Button>
+                        </DialogClose>
                     </form>
                 </Form>
                 <DialogFooter>

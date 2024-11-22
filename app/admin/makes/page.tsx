@@ -1,35 +1,12 @@
-// "use client";
-// import { Button } from "@/components/ui/button";
-import DataTable from "@/components/ui/DataTable/data-table";
-import { ColumnDef } from "@tanstack/react-table";
-import SearchMake from "./search-make";
-import AddMake from "./add-make";
-// import { useEffect, useState } from "react";
+import SearchMake from "./_components/search-make";
+import AddMake from "./_components/add-make";
+import { prisma } from "@/lib/prisma";
+import { Make } from "@prisma/client";
+import MakesGrid from "./_components/makes-grid";
 
-export type Make = {
-    id: number,
-    name: string,
-}
+async function Makes() {
 
-const makeColumns: ColumnDef<Make>[] = [
-    {
-        accessorKey: "name",
-        header: "Name"
-    },
-]
-
-function Makes() {
-
-    const makesData:Make[] = [];
-
-    // useEffect(() => {
-    //     getMakeData();
-    // }, []);
-
-    // function getMakeData(){
-    //     const localStorageData: { makes: Make[] } = JSON.parse(localStorage.getItem("data") || '{"makes":[]}');
-    //     setMakeData(localStorageData.makes)
-    // }
+    const makesData: Make[] = await prisma.make.findMany();
 
     return (
         <div className="container mx-auto py-10 grid gap-3">
@@ -37,7 +14,7 @@ function Makes() {
                 <AddMake />
                 <SearchMake />
             </div>
-            <DataTable columns={makeColumns} data={makesData} />
+            <MakesGrid data={makesData} />
         </div>
     );
 }
