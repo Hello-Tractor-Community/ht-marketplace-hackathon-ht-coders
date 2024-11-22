@@ -11,4 +11,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     verifyRequest: '/auth/signin',
     error: '/auth/signin',
   },
+  session: {
+    strategy: 'jwt',
+  },
+  callbacks: {
+    session: async ({ session, token }) => {
+      return session;
+    },
+  },
 });

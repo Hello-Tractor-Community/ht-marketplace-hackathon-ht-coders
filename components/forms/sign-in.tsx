@@ -5,6 +5,7 @@ import {
     InputOTPSeparator,
     InputOTPSlot,
 } from "@/components/ui/input-otp"
+import { signIn } from "next-auth/react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -18,6 +19,7 @@ interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> { }
 
 export function UserLoginAuthForm({ className, ...props }: UserAuthFormProps) {
     const [isLoading, setIsLoading] = useState<boolean>(false)
+    const [isLoadingGoogle, setIsLoadingGoogle] = useState<boolean>(false)
     const [step, setStep] = useState<number>(0)
 
     async function onSubmit(event: React.SyntheticEvent) {
@@ -105,8 +107,13 @@ export function UserLoginAuthForm({ className, ...props }: UserAuthFormProps) {
                         </span>
                     </div>
                 </div>
-                <Button variant="outline" type="button" size={"lg"} className='border-primary' disabled={isLoading}>
-                    {isLoading ? (
+                <Button
+                    onClick={() => {
+                        setIsLoadingGoogle(true)
+                        signIn("google", { redirectTo: "/" })
+                    }}
+                    variant="outline" type="button" size={"lg"} className='border-primary' disabled={isLoadingGoogle}>
+                    {isLoadingGoogle ? (
                         <Loader className="mr-2 h-4 w-4 animate-spin" />
                     ) : (
                         <>
