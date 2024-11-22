@@ -18,10 +18,12 @@ model User {
   role             Role          @default(USER)
   createdAt        DateTime      @default(now())
   updatedAt        DateTime      @updatedAt
+  otp              Int?
+  otpExpiresAt     DateTime?
   accounts         Account[]
   AdminAction      AdminAction[]
   Inquiry          Inquiry[]
-  // listings         Listing[]
+  listings         Listing[]
   messagesReceived Message[]     @relation("ReceivedMessages")
   messagesSent     Message[]     @relation("SentMessages")
   sessions         Session[]
@@ -63,7 +65,7 @@ model Listing {
   location    String
   year        Int
   photos      String[]
-  // sellerId    String        @default("")
+  sellerId    String        @default("")
   status      ListingStatus @default(ACTIVE)
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
@@ -74,7 +76,8 @@ model Listing {
   inquiries   Inquiry[]
   make        Make          @relation(fields: [makeId], references: [id], onDelete: NoAction)
   model       Model         @relation(fields: [modelId], references: [id], onDelete: NoAction)
-  // seller      User          @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+  seller      User          @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+  userId      String?
 }
 
 model Make {
