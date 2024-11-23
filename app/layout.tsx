@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Manrope } from 'next/font/google'
 import "./globals.css";
+import { Toaster } from 'sonner'
 
 
 const font = Manrope({
@@ -26,6 +27,9 @@ export default function RootLayout({
         className={`${font.className} antialiased`}
       >
         {children}
+        <Toaster
+          position="top-center"
+        />
       </body>
     </html>
   );

@@ -1,4 +1,5 @@
 "use client"
+import { toast } from "sonner";
 import {
     InputOTP,
     InputOTPGroup,
@@ -8,47 +9,91 @@ import {
 import { signIn } from "next-auth/react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
+import {
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+} from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Loader } from 'lucide-react'
 import { Checkbox } from '@/components/ui/checkbox'
 import { useState } from 'react'
 import { Progress } from '@/components/ui/progress'
+import { z } from 'zod'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { signInWithPhone } from '@/lib/actions'
 
 interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> { }
 
 export function UserLoginAuthForm({ className, ...props }: UserAuthFormProps) {
     const [isLoading, setIsLoading] = useState<boolean>(false)
     const [isLoadingGoogle, setIsLoadingGoogle] = useState<boolean>(false)
+    const [userId, setUserId] = useState<string>("")
     const [step, setStep] = useState<number>(0)
 
-    async function onSubmit(event: React.SyntheticEvent) {
-        event.preventDefault()
-        setIsLoading(true)
-        setTimeout(() => {
-            setIsLoading(false)
-            setStep(step + 1)
-        }, 2000)
-    }
+    const formSchema = z.object({
+        phone: z.string().min(10, {
+            message: "Please enter a valid phone number"
+        }),
+    })
+
+    const form = useForm<z.infer<typeof formSchema>>({
+        resolver: zodResolver(formSchema),
+        defaultValues: {
+            phone: "",
+        },
+    })
+
+    // 2. Define a submit handler.
+    const onSubmit = async (values: z.infer<typeof formSchema>) => {
+        try {
+            setIsLoading(true);
+            const response = await signInWithPhone(values.phone);
+            setIsLoading(false);
+            if (!response.success) {
+                toast.error(response.message, {
+                    className: 'bg-red-500 text-white',
+                });
+            } else {
+                setUserId(response.userId ?? "");
+                toast.success("OTP sent successfully", {
+                    className: 'bg-green-500 text-white',
+                });
+                setStep(1);
+            }
+        } catch (error: any) {
+            setIsLoading(false);
+            toast.error(error.message, {
+                className: 'bg-red-500 text-white',
+            });
+        }
+    };
 
     return (
         <>
             <Progress value={step === 0 ? 50 : 100} />
             <div className={cn("grid gap-5", className)} {...props}>
                 {step === 0 && (
-                    <form onSubmit={onSubmit}>
-                        <div className="grid gap-8">
-                            <div className="grid gap-5">
-                                <Label htmlFor="email" className="after:content-['*'] after:text-red-500 after:ml-1 font-semibold">
-                                    Phone Number
-                                </Label>
-                                <Input
-                                    id="phone"
-                                    placeholder="Eg. 0717255460"
-                                    type="tel"
-                                    disabled={isLoading}
-                                />
-                            </div>
+                    <Form {...form}>
+                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                            <FormField
+                                control={form.control}
+                                name="phone"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel className="after:content-['*'] after:text-red-500 after:ml-1 font-semibold">Phone Number</FormLabel>
+                                        <FormControl>
+                                            <Input disabled={isLoading} placeholder="Eg. 0717255460" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
                             <div className="flex items-center space-x-2">
                                 <Checkbox id="terms" />
                                 <label
@@ -58,17 +103,17 @@ export function UserLoginAuthForm({ className, ...props }: UserAuthFormProps) {
                                     Remember me
                                 </label>
                             </div>
-                            <Button disabled={isLoading} size={"lg"}>
+                            <Button disabled={isLoading} size={"lg"} className='w-full'>
                                 {isLoading && (
                                     <Loader className="mr-2 h-4 w-4 animate-spin" />
                                 )}
                                 Sign In
                             </Button>
-                        </div>
-                    </form>
+                        </form>
+                    </Form>
                 )}
                 {step === 1 && (
-                    <form onSubmit={onSubmit}>
+                    <form>
                         <div className="grid gap-8">
                             <div className="grid gap-5">
                                 <Label htmlFor="otp" className="after:content-['*'] after:text-red-500 after:ml-1 font-semibold">
