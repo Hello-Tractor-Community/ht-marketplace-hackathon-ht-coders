@@ -1,10 +1,8 @@
 'use server';
 import bcrypt from 'bcrypt';
-import { redirect } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
 import crypto from 'crypto';
 import sgMail from '@sendgrid/mail';
-import { signIn } from './auth';
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY || '');
 
@@ -50,7 +48,9 @@ export async function verifyOTP(
       await generateAndSendOTP(userId);
     }
 
-    const isOtpValid = await bcrypt.compare(enteredOtp.toString(), user.otp);
+    const isOtpValid = user.otp
+      ? await bcrypt.compare(enteredOtp.toString(), user.otp)
+      : false;
 
     if (!isOtpValid) {
       return { success: false, message: 'Invalid OTP' };
