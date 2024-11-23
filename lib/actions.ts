@@ -30,13 +30,16 @@ async function sendEmail({
   }
 }
 
-// Function to verify OTP
-async function verifyOTP(userId: string, enteredOtp: number): Promise<boolean> {
+// verify OTP and login the user
+async function verifyOTP(
+  userId: string,
+  enteredOtp: number
+): Promise<{ success: boolean; message?: string; userId?: string }> {
   try {
     const user = await prisma.user.findUnique({ where: { id: userId } });
 
     if (!user) {
-      throw new Error('Account not found');
+      return { success: false, message: 'Account not found' };
     }
 
     if (
@@ -45,7 +48,7 @@ async function verifyOTP(userId: string, enteredOtp: number): Promise<boolean> {
       !user.otpExpiresAt ||
       new Date() > user.otpExpiresAt
     ) {
-      throw new Error('Invalid or expired OTP');
+      return { success: false, message: 'Invalid OTP' };
     }
 
     // Clear OTP fields after successful verification
@@ -54,9 +57,9 @@ async function verifyOTP(userId: string, enteredOtp: number): Promise<boolean> {
       data: { otp: null, otpExpiresAt: null },
     });
 
-    return true;
+    return { success: true, userId };
   } catch (error) {
-    throw new Error('OTP verification failed. Please try again.');
+    return { success: false, message: 'Failed to verify OTP' };
   }
 }
 
