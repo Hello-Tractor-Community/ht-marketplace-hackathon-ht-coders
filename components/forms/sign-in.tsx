@@ -18,7 +18,6 @@ import {
     FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Loader } from 'lucide-react'
 import { Checkbox } from '@/components/ui/checkbox'
 import { useState } from 'react'
@@ -26,7 +25,7 @@ import { Progress } from '@/components/ui/progress'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { signInWithPhone } from '@/lib/actions'
+import { signInWithPhone, verifyOTP } from '@/lib/actions'
 
 interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> { }
 
@@ -42,6 +41,12 @@ export function UserLoginAuthForm({ className, ...props }: UserAuthFormProps) {
         }),
     })
 
+    const verifyOtpFormSchema = z.object({
+        otp: z.string().min(6, {
+            message: "Your one-time password must be 6 characters.",
+        }),
+    })
+
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -49,30 +54,47 @@ export function UserLoginAuthForm({ className, ...props }: UserAuthFormProps) {
         },
     })
 
-    // 2. Define a submit handler.
+    const otpForm = useForm<z.infer<typeof verifyOtpFormSchema>>({
+        resolver: zodResolver(verifyOtpFormSchema),
+        defaultValues: {
+            otp: "",
+        },
+    })
+
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
         try {
             setIsLoading(true);
             const response = await signInWithPhone(values.phone);
             setIsLoading(false);
             if (!response.success) {
-                toast.error(response.message, {
-                    className: 'bg-red-500 text-white',
-                });
+                toast.error(response.message, { className: 'bg-red-500 text-white', });
             } else {
                 setUserId(response.userId ?? "");
-                toast.success("OTP sent successfully", {
-                    className: 'bg-green-500 text-white',
-                });
+                toast.success("OTP sent successfully", { className: 'bg-green-500 text-white', });
                 setStep(1);
             }
         } catch (error: any) {
             setIsLoading(false);
-            toast.error(error.message, {
-                className: 'bg-red-500 text-white',
-            });
+            toast.error(error.message, { className: 'bg-red-500 text-white', });
         }
     };
+
+    const onSubmitVerifyOtp = (data: z.infer<typeof verifyOtpFormSchema>) => {
+        setIsLoading(true);
+        verifyOTP(userId, +data.otp).then(async (response) => {
+            if (response.success) {
+                toast.success("OTP verified successfully", { className: 'bg-green-500 text-white', });
+                await signIn('credentials', { phone: form.getValues("phone") });
+                toast.success("Successfully signed in", { className: 'bg-green-500 text-white', });
+            } else {
+                toast.error(response.message, { className: 'bg-red-500 text-white', });
+            }
+            setIsLoading(false);
+        }).catch((error: any) => {
+            toast.error(error.message, { className: 'bg-red-500 text-white', });
+            setIsLoading(false);
+        });
+    }
 
     return (
         <>
@@ -113,26 +135,33 @@ export function UserLoginAuthForm({ className, ...props }: UserAuthFormProps) {
                     </Form>
                 )}
                 {step === 1 && (
-                    <form>
-                        <div className="grid gap-8">
-                            <div className="grid gap-5">
-                                <Label htmlFor="otp" className="after:content-['*'] after:text-red-500 after:ml-1 font-semibold">
-                                    Enter OTP sent to your phone or email
-                                </Label>
-                                <InputOTP maxLength={6}>
-                                    <InputOTPGroup>
-                                        <InputOTPSlot className='h-14 w-20' index={0} />
-                                        <InputOTPSlot className='h-14 w-20' index={1} />
-                                        <InputOTPSlot className='h-14 w-20' index={2} />
-                                    </InputOTPGroup>
-                                    <InputOTPSeparator className='text-primary' />
-                                    <InputOTPGroup>
-                                        <InputOTPSlot className='h-14 w-20' index={3} />
-                                        <InputOTPSlot className='h-14 w-20' index={4} />
-                                        <InputOTPSlot className='h-14 w-20' index={5} />
-                                    </InputOTPGroup>
-                                </InputOTP>
-                            </div>
+                    <Form {...otpForm}>
+                        <form onSubmit={otpForm.handleSubmit(onSubmitVerifyOtp)} className="space-y-6">
+                            <FormField
+                                control={otpForm.control}
+                                name="otp"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel className="after:content-['*'] after:text-red-500 after:ml-1 font-semibold">Enter OTP sent to your phone or email</FormLabel>
+                                        <FormControl>
+                                            <InputOTP maxLength={6} {...field}>
+                                                <InputOTPGroup>
+                                                    <InputOTPSlot className='h-14 w-20' index={0} />
+                                                    <InputOTPSlot className='h-14 w-20' index={1} />
+                                                    <InputOTPSlot className='h-14 w-20' index={2} />
+                                                </InputOTPGroup>
+                                                <InputOTPSeparator className='text-primary' />
+                                                <InputOTPGroup>
+                                                    <InputOTPSlot className='h-14 w-20' index={3} />
+                                                    <InputOTPSlot className='h-14 w-20' index={4} />
+                                                    <InputOTPSlot className='h-14 w-20' index={5} />
+                                                </InputOTPGroup>
+                                            </InputOTP>
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
                             <p className="text-sm text-muted-foreground">
                                 Didn't receive the otp? {" "}
                                 <span
@@ -152,14 +181,14 @@ export function UserLoginAuthForm({ className, ...props }: UserAuthFormProps) {
                                     Resend OTP
                                 </span>
                             </p>
-                            <Button disabled={isLoading} size={"lg"}>
+                            <Button disabled={isLoading} size={"lg"} className='w-full'>
                                 {isLoading && (
                                     <Loader className="mr-2 h-4 w-4 animate-spin" />
                                 )}
                                 Verify OTP
                             </Button>
-                        </div>
-                    </form>
+                        </form>
+                    </Form>
                 )}
                 <div className="relative">
                     <div className="absolute inset-0 flex items-center">

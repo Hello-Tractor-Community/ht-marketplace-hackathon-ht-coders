@@ -1,8 +1,10 @@
 'use server';
 import bcrypt from 'bcrypt';
+import { redirect } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
 import crypto from 'crypto';
 import sgMail from '@sendgrid/mail';
+import { signIn } from './auth';
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY || '');
 
@@ -32,7 +34,7 @@ async function sendEmail({
 }
 
 // verify OTP and login the user
-async function verifyOTP(
+export async function verifyOTP(
   userId: string,
   enteredOtp: number
 ): Promise<{ success: boolean; message?: string; userId?: string }> {
@@ -41,6 +43,11 @@ async function verifyOTP(
 
     if (!user) {
       return { success: false, message: 'Account not found' };
+    }
+
+    // if user.otp is null, then the user has not requested an OTP so request one
+    if (!user.otp) {
+      await generateAndSendOTP(userId);
     }
 
     const isOtpValid = await bcrypt.compare(enteredOtp.toString(), user.otp);
@@ -58,8 +65,6 @@ async function verifyOTP(
       where: { id: userId },
       data: { otp: null, otpExpiresAt: null },
     });
-
-    // login the user
 
     return { success: true, userId };
   } catch (error) {
