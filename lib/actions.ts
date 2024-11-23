@@ -1,4 +1,5 @@
 'use server';
+import bcrypt from 'bcrypt';
 import { prisma } from '@/lib/prisma';
 import crypto from 'crypto';
 import sgMail from '@sendgrid/mail';
@@ -42,13 +43,14 @@ async function verifyOTP(
       return { success: false, message: 'Account not found' };
     }
 
-    if (
-      !user.otp ||
-      user.otp !== enteredOtp ||
-      !user.otpExpiresAt ||
-      new Date() > user.otpExpiresAt
-    ) {
+    const isOtpValid = await bcrypt.compare(enteredOtp.toString(), user.otp);
+
+    if (!isOtpValid) {
       return { success: false, message: 'Invalid OTP' };
+    }
+
+    if (user.otpExpiresAt && new Date() > user.otpExpiresAt) {
+      return { success: false, message: 'OTP has expired' };
     }
 
     // Clear OTP fields after successful verification
@@ -56,6 +58,8 @@ async function verifyOTP(
       where: { id: userId },
       data: { otp: null, otpExpiresAt: null },
     });
+
+    // login the user
 
     return { success: true, userId };
   } catch (error) {
@@ -69,10 +73,12 @@ export async function generateAndSendOTP(userId: string): Promise<boolean> {
     const otp = crypto.randomInt(100000, 999999);
     const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000); // OTP valid for 10 minutes
 
+    const hashedOtp = await bcrypt.hash(otp.toString(), 10);
+
     // Update the user record with the generated OTP and expiration time
     const updatedUser = await prisma.user.update({
       where: { id: userId },
-      data: { otp: Number(otp), otpExpiresAt },
+      data: { otp: hashedOtp, otpExpiresAt },
     });
 
     if (!updatedUser) {

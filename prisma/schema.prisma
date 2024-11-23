@@ -18,7 +18,7 @@ model User {
   role             Role          @default(USER)
   createdAt        DateTime      @default(now())
   updatedAt        DateTime      @updatedAt
-  otp              Int?
+  otp              String?
   otpExpiresAt     DateTime?
   accounts         Account[]
   AdminAction      AdminAction[]

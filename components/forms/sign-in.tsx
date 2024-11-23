@@ -133,6 +133,25 @@ export function UserLoginAuthForm({ className, ...props }: UserAuthFormProps) {
                                     </InputOTPGroup>
                                 </InputOTP>
                             </div>
+                            <p className="text-sm text-muted-foreground">
+                                Didn't receive the otp? {" "}
+                                <span
+                                    onClick={() => {
+                                        signInWithPhone(form.getValues("phone")).then(() => {
+                                            toast.success("OTP sent successfully", {
+                                                className: 'bg-green-500 text-white',
+                                            });
+                                        }).catch((error: any) => {
+                                            toast.error(error.message, {
+                                                className: 'bg-red-500 text-white',
+                                            });
+                                        });
+                                    }}
+                                    className="text-blue-600 hover:text-primary hover:transition duration-500 cursor-pointer"
+                                >
+                                    Resend OTP
+                                </span>
+                            </p>
                             <Button disabled={isLoading} size={"lg"}>
                                 {isLoading && (
                                     <Loader className="mr-2 h-4 w-4 animate-spin" />
