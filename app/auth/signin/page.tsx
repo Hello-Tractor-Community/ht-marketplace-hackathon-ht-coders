@@ -1,7 +1,7 @@
 import Link from "next/link"
 import { UserLoginAuthForm } from '@/components/forms/sign-in'
 
-export default function SignIn() {
+export default async function SignIn() {    
     return (
         <>
             <div className="flex flex-col space-y-2">
